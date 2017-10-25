@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity;
 import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
 import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
 
@@ -48,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.set1) {
-            Intent intent = new Intent(this, MapActivity.class);
+            Intent intent = new Intent(this, BluetoothActivity.class);
             startActivity(intent);
         }
 
