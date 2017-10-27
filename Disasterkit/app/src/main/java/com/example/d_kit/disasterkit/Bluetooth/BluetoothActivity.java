@@ -13,6 +13,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,6 +24,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
+import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
+import com.example.d_kit.disasterkit.QRCord.QRmade;
 import com.example.d_kit.disasterkit.R;
 
 import java.util.ArrayList;
@@ -55,6 +61,8 @@ public class BluetoothActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_bluetooth);
         findViewsByIds();
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
         //check device support bluetooth or not
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -75,6 +83,43 @@ public class BluetoothActivity extends AppCompatActivity {
         chatMessages = new ArrayList<>();
         chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
         listView.setAdapter(chatAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.set1) {
+            Intent intent = new Intent(this, BluetoothActivity.class);
+            startActivity(intent);
+        }
+
+        if (id == R.id.set2) {
+            Intent intent = new Intent(this, QRmade.class);
+            startActivity(intent);
+        }
+
+        if (id == R.id.set3) {
+            Intent intent = new Intent(this, MapActivity.class);
+            startActivity(intent);
+        }
+
+        if (id == R.id.set4) {
+            Intent intent = new Intent(this, MapDownload_Activity.class);
+            startActivity(intent);
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private Handler handler = new Handler(new Handler.Callback() {

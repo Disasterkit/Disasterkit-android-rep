@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.example.d_kit.disasterkit.MainActivity"
+            android:name="com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -33,10 +33,10 @@
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"/>
         <activity android:name="com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity"
-            android:label="@string/app_name"
+            android:label="マップダウンロード"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name="com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity"
-            android:label="@string/app_name"
+        <activity android:name="com.example.d_kit.disasterkit.QRCord.QRmade"
+            android:label="QRコード"
             android:theme="@style/AppTheme.NoActionBar" />
     </application>
 

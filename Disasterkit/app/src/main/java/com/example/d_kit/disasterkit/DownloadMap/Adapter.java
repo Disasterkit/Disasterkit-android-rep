@@ -24,7 +24,7 @@ public class Adapter extends SimpleAdapter {
     public class ViewHolder {
         TextView line1;
         TextView line2;
-       Button downloadButton;
+        Button downloadButton;
     }
 
     public Adapter(Context context, List<? extends Map<String, ?>> data, int resource, String[] from, int[] to) {

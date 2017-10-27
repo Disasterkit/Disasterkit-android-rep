@@ -20,7 +20,9 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.view.Menu;
 
+import com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity;
 import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
+import com.example.d_kit.disasterkit.QRCord.QRmade;
 import com.example.d_kit.disasterkit.R;
 
 import java.io.File;
@@ -76,6 +78,7 @@ public class MapDownload_Activity extends AppCompatActivity {
         data.put("comment", "94.6MB");
         dataList.add(data);
 
+        data = new HashMap<String, String>();
         data.put("title", "関東地方");
         data.put("comment", "129.7MB");
         dataList.add(data);
@@ -85,6 +88,7 @@ public class MapDownload_Activity extends AppCompatActivity {
         data.put("comment", "167.8MB");
         dataList.add(data);
 
+        data = new HashMap<String, String>();
         data.put("title", "関西地方");
         data.put("comment", "86.2MB");
         dataList.add(data);
@@ -94,6 +98,7 @@ public class MapDownload_Activity extends AppCompatActivity {
         data.put("comment", "68.7");
         dataList.add(data);
 
+        data = new HashMap<String, String>();
         data.put("title", "四国地方");
         data.put("comment", "34.5MB");
         dataList.add(data);
@@ -103,6 +108,7 @@ public class MapDownload_Activity extends AppCompatActivity {
         data.put("comment", "90.6MB");
         dataList.add(data);
 
+        data = new HashMap<String, String>();
         data.put("title", "沖縄県");
         data.put("comment", "6.4MB");
         dataList.add(data);
@@ -328,12 +334,12 @@ public class MapDownload_Activity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.set1) {
-            Intent intent = new Intent(this, MapActivity.class);
+            Intent intent = new Intent(this, BluetoothActivity.class);
             startActivity(intent);
         }
 
         if (id == R.id.set2) {
-            Intent intent = new Intent(this, MapActivity.class);
+            Intent intent = new Intent(this, QRmade.class);
             startActivity(intent);
         }
 

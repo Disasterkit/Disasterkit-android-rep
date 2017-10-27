@@ -17,6 +17,7 @@ import android.widget.Toast;
 import com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity;
 import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
 import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
+import com.example.d_kit.disasterkit.QRCord.QRmade;
 
 public class MainActivity extends AppCompatActivity {
     private final int REQUEST_PERMISSION = 1000;
@@ -54,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (id == R.id.set2) {
-            Intent intent = new Intent(this, MapActivity.class);
+            Intent intent = new Intent(this, QRmade.class);
             startActivity(intent);
         }
 
