@@ -63,7 +63,8 @@ public class BluetoothActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_bluetooth);
-        findViewsByIds();
+        status = (TextView) findViewById(R.id.status);
+        btnConnect = (Button) findViewById(R.id.btn_connect);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -82,10 +83,12 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         });
 
+        /*
         //set chat adapter
         chatMessages = new ArrayList<>();
         chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
         listView.setAdapter(chatAdapter);
+        */
     }
 
     @Override
@@ -167,6 +170,7 @@ public class BluetoothActivity extends AppCompatActivity {
                     setContentView(R.layout.activity_chat);//チャットの画面へ遷移
                     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                     setSupportActionBar(toolbar);
+                    findViewsByIds();
                     break;
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
@@ -219,6 +223,7 @@ public class BluetoothActivity extends AppCompatActivity {
             setContentView(R.layout.activity_chat);//チャットの画面へ遷移 テスト用
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            findViewsByIds();
         }
 
         //Handling listview item click event
@@ -270,11 +275,15 @@ public class BluetoothActivity extends AppCompatActivity {
     }
 
     private void findViewsByIds() {
-        status = (TextView) findViewById(R.id.status);
-        btnConnect = (Button) findViewById(R.id.btn_connect);
         listView = (ListView) findViewById(R.id.list);
         inputLayout = (TextInputLayout) findViewById(R.id.input_layout);
         View btnSend = findViewById(R.id.btn_send);
+
+
+        //set chat adapter
+        chatMessages = new ArrayList<>();
+        chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
+        listView.setAdapter(chatAdapter);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -288,6 +297,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 }
             }
         });
+
 
     }
 
@@ -303,6 +313,7 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
+
     private void sendMessage(String message) {
         if (chatController.getState() != ChatController.STATE_CONNECTED) {
             Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
@@ -314,6 +325,7 @@ public class BluetoothActivity extends AppCompatActivity {
             chatController.write(send);
         }
     }
+
 
     @Override
     public void onStart() {
