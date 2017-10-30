@@ -20,9 +20,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.EditText;
 
 import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
 import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
@@ -38,6 +40,7 @@ public class BluetoothActivity extends AppCompatActivity {
     private Button btnConnect;
     private ListView listView;
     private Dialog dialog;
+    private EditText editText;
     private TextInputLayout inputLayout;
     private ArrayAdapter<String> chatAdapter;
     private ArrayList<String> chatMessages;
@@ -161,6 +164,9 @@ public class BluetoothActivity extends AppCompatActivity {
                     connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
                     Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
                             Toast.LENGTH_SHORT).show();
+                    setContentView(R.layout.activity_chat);//チャットの画面へ遷移
+                    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+                    setSupportActionBar(toolbar);
                     break;
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
@@ -208,7 +214,11 @@ public class BluetoothActivity extends AppCompatActivity {
                 pairedDevicesAdapter.add(device.getName() + "\n" + device.getAddress());
             }
         } else {
+            //setContentView(R.layout.activity_chat);//チャットの画面へ遷移
             pairedDevicesAdapter.add(getString(R.string.none_paired));
+            setContentView(R.layout.activity_chat);//チャットの画面へ遷移 テスト用
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+            setSupportActionBar(toolbar);
         }
 
         //Handling listview item click event
@@ -278,6 +288,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {

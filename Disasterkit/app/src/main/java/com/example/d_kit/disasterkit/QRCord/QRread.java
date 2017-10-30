@@ -12,10 +12,6 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 
 import java.util.List;
 
-/**
- * Created by yoshio on 2017/10/23.
- */
-
 public class QRread extends AppCompatActivity {
     private CompoundBarcodeView mBarcodeView;
     @Override
