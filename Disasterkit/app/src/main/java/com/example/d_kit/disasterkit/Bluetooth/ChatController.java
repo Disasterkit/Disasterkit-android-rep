@@ -154,6 +154,16 @@ public class ChatController {
         r.write(out);
     }
 
+    public void writelocation(byte[] out) {
+        ReadWriteThread r;
+        synchronized (this) {
+            if (state != STATE_CONNECTED)
+                return;
+            r = connectedThread;
+        }
+        r.writelocation(out);
+    }
+
     private void connectionFailed() {
         Message msg = handler.obtainMessage(BluetoothActivity.MESSAGE_TOAST);
         Bundle bundle = new Bundle();
@@ -311,6 +321,8 @@ public class ChatController {
             // Keep listening to the InputStream
             while (true) {
                 try {
+
+
                     // Read from the InputStream
                     bytes = inputStream.read(buffer);
 
@@ -331,6 +343,15 @@ public class ChatController {
             try {
                 outputStream.write(buffer);
                 handler.obtainMessage(BluetoothActivity.MESSAGE_WRITE, -1, -1,
+                        buffer).sendToTarget();
+            } catch (IOException e) {
+            }
+        }
+
+        public  void writelocation(byte[] buffer){
+            try {
+                outputStream.write(buffer);
+                handler.obtainMessage(BluetoothActivity.LOCATION_READ, -1, -1,
                         buffer).sendToTarget();
             } catch (IOException e) {
             }
