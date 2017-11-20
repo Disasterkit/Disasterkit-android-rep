@@ -7,6 +7,7 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
@@ -45,6 +46,10 @@ public class MapActivity extends AppCompatActivity implements LocationListener
     private Location lastLocation;
     //private Location mylastLocation;
     private final static int PERMISSION_REQUEST_CODE = 1;
+    private double[] acceptlocation;
+    private double[] otherlocation;
+
+    int i=0;
 
     private MapView mapView;
 
@@ -58,6 +63,18 @@ public class MapActivity extends AppCompatActivity implements LocationListener
 
         mapView = new MapView(this);
         setContentView(mapView);
+
+        Intent intent = getIntent();
+        acceptlocation = intent.getDoubleArrayExtra("key");
+        otherlocation=new double[10];
+        if (acceptlocation[i]!=0) {
+
+            while (acceptlocation[i] != 0) {
+                otherlocation[i] = acceptlocation[i];
+                i++;
+            }
+        }
+
 
         // ロケーションマネージャのインスタンスを取得する
 
@@ -75,12 +92,15 @@ public class MapActivity extends AppCompatActivity implements LocationListener
         // targetSDK 23 以上の場合、実行時にパーミッション確認を行う必要がある
         // https://stackoverflow.com/questions/8854359/exception-open-failed-eacces-permission-denied-on-android
         // https://developer.android.com/training/permissions/requesting.html
-        final int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-        } else {
-            displayMap(lastLocation);
+        if (Build.VERSION.SDK_INT >= 23) {
+            final int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+            if (permission != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+            } else {
+                displayMap(lastLocation);
+            }
         }
+
 
     }
 
@@ -123,7 +143,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener
     }
 
 
-    @Override//前回の位置を記録する
+    @Override//最後の位置を記録する
     public void onStart() {
         super.onStart();
 
@@ -227,6 +247,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener
             mapView.setCenter(new LatLong(location.getLatitude(), location.getLongitude())); //現在地からマップスタート
             mapView.setZoomLevel((byte) 13);
             nowLocation(location);//現在地へのマーカーの出力
+            TUNODAMaker();
         }
 
         else {
@@ -248,7 +269,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener
 
 
     public void TUNODAMaker(){
-        LatLong tunoda = new LatLong(35.835311, 139.689335);
+        LatLong tunoda = new LatLong(otherlocation[0], otherlocation[1]);
         Marker marker = createBubbleMarker(tunoda, R.drawable.marker_green, "角田の家");
         mapView.getLayerManager().getLayers().add(marker);
 

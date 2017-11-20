@@ -1,17 +1,26 @@
 package com.example.d_kit.disasterkit.Bluetooth;
 
+import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.TextInputLayout;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -20,30 +29,37 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.EditText;
 
 import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
 import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
+import com.example.d_kit.disasterkit.Myapp;
 import com.example.d_kit.disasterkit.QRCord.QRmade;
 import com.example.d_kit.disasterkit.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import static android.R.attr.data;
+import static java.lang.Double.parseDouble;
 
 public class BluetoothActivity extends AppCompatActivity {
 
     private TextView status;
     private Button btnConnect;
     private ListView listView;
+    private ListView listView2;
     private Dialog dialog;
-    private EditText editText;
     private TextInputLayout inputLayout;
     private ArrayAdapter<String> chatAdapter;
     private ArrayList<String> chatMessages;
+    private ArrayAdapter<String> chatAdapter2;
+    private ArrayList<String> chatMessages2;
     private BluetoothAdapter bluetoothAdapter;
 
     public static final int MESSAGE_STATE_CHANGE = 1;
@@ -51,21 +67,42 @@ public class BluetoothActivity extends AppCompatActivity {
     public static final int MESSAGE_WRITE = 3;
     public static final int MESSAGE_DEVICE_OBJECT = 4;
     public static final int MESSAGE_TOAST = 5;
+    public static final int LOCATION_READ = 6;
     public static final String DEVICE_OBJECT = "device_name";
+    private final int REQUEST_PERMISSION = 1000;
 
     private static final int REQUEST_ENABLE_BLUETOOTH = 1;
     private ChatController chatController;
     private BluetoothDevice connectingDevice;
     private ArrayAdapter<String> discoveredDevicesAdapter;
 
+    //新規
+    private LocationManager myLocationManager;
+    private Location lastLocation;
+    private Myapp myapp;
+    private  double[] location;
+    int i,x,y=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_bluetooth);
-        findViewsByIds();
+        status = (TextView) findViewById(R.id.status);
+        btnConnect = (Button) findViewById(R.id.btn_connect);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        myapp = (Myapp) this.getApplication();
+        location=new double[10];
+        for(int h=0;h<10;h++){
+            location[h]=0;
+        }
+
+
+        checkPermission();
+        confirmPermission();
+
 
         //check device support bluetooth or not
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -82,10 +119,12 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         });
 
+        /*
         //set chat adapter
         chatMessages = new ArrayList<>();
         chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
         listView.setAdapter(chatAdapter);
+        */
     }
 
     @Override
@@ -114,6 +153,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
         if (id == R.id.set3) {
             Intent intent = new Intent(this, MapActivity.class);
+            intent.putExtra("key", location);
             startActivity(intent);
         }
 
@@ -155,23 +195,36 @@ public class BluetoothActivity extends AppCompatActivity {
                     break;
                 case MESSAGE_READ:
                     byte[] readBuf = (byte[]) msg.obj;
-
                     String readMessage = new String(readBuf, 0, msg.arg1);
-                    chatMessages.add(connectingDevice.getName() + ":  " + readMessage);
-                    chatAdapter.notifyDataSetChanged();
+                    try {
+                        Double readLocation=Double.parseDouble(readMessage);
+                            location[x]=readLocation;
+                            x++;
+
+                    } catch (NumberFormatException e) {
+                        chatMessages.add(connectingDevice.getName() + ":  " + readMessage);
+                        chatAdapter.notifyDataSetChanged();
+
+                    }
+
+
                     break;
                 case MESSAGE_DEVICE_OBJECT:
-                    connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
-                    Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
-                            Toast.LENGTH_SHORT).show();
                     setContentView(R.layout.activity_chat);//チャットの画面へ遷移
                     Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
                     setSupportActionBar(toolbar);
+                    findViewsByIds();
+                    connectingDevice = msg.getData().getParcelable(DEVICE_OBJECT);
+                    Toast.makeText(getApplicationContext(), "Connected to " + connectingDevice.getName(),
+                            Toast.LENGTH_SHORT).show();
                     break;
                 case MESSAGE_TOAST:
                     Toast.makeText(getApplicationContext(), msg.getData().getString("toast"),
                             Toast.LENGTH_SHORT).show();
                     break;
+                case LOCATION_READ:
+                    break;
+
             }
             return false;
         }
@@ -216,9 +269,12 @@ public class BluetoothActivity extends AppCompatActivity {
         } else {
             //setContentView(R.layout.activity_chat);//チャットの画面へ遷移
             pairedDevicesAdapter.add(getString(R.string.none_paired));
+            /*
             setContentView(R.layout.activity_chat);//チャットの画面へ遷移 テスト用
             Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
             setSupportActionBar(toolbar);
+            findViewsByIds();
+            */
         }
 
         //Handling listview item click event
@@ -270,11 +326,17 @@ public class BluetoothActivity extends AppCompatActivity {
     }
 
     private void findViewsByIds() {
-        status = (TextView) findViewById(R.id.status);
-        btnConnect = (Button) findViewById(R.id.btn_connect);
         listView = (ListView) findViewById(R.id.list);
         inputLayout = (TextInputLayout) findViewById(R.id.input_layout);
         View btnSend = findViewById(R.id.btn_send);
+        View locationSend = findViewById(R.id.btn_location);
+
+
+        //set chat adapter
+        chatMessages = new ArrayList<>();
+        chatAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, chatMessages);
+
+        listView.setAdapter(chatAdapter);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -289,6 +351,19 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         });
 
+        //新規で追加したところ
+        locationSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                getLocation();
+                try {
+                    sendLocation(lastLocation);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -303,6 +378,7 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
+
     private void sendMessage(String message) {
         if (chatController.getState() != ChatController.STATE_CONNECTED) {
             Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
@@ -314,6 +390,31 @@ public class BluetoothActivity extends AppCompatActivity {
             chatController.write(send);
         }
     }
+
+    //新規
+    private void sendLocation(Location location) throws InterruptedException {
+
+        if (chatController.getState() != ChatController.STATE_CONNECTED) {
+            Toast.makeText(this, "Connection was lost!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (location != null) {
+            String Longitude=String.valueOf(location.getLongitude());
+            byte[] sendLongitude = Longitude.getBytes();
+            String Latitude=String.valueOf(location.getLatitude());
+            byte[] sendLatitude = Latitude.getBytes();
+            chatController.writelocation(sendLatitude);
+            try{
+                Thread.sleep(1000); //1000ミリ秒Sleepする
+            }catch(InterruptedException e){}
+            chatController.writelocation(sendLongitude);
+        }
+        else{
+            Toast.makeText(this, "Location is null!!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     @Override
     public void onStart() {
@@ -361,4 +462,85 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
     };
+
+    //新規
+    public void getLocation() {
+
+        if (PermissionChecker.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            myLocationManager = (LocationManager) getSystemService(LOCATION_SERVICE);//デフォルト表示
+             lastLocation = myLocationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);//最後に受け取った現在位置
+        }
+    }
+
+
+    //GPSを使うためのパーミッションの確認
+    //API23以上は子の確認がないと動作しない
+    private void confirmPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            new AlertDialog.Builder(this).setTitle("パーミッション説明")
+                    .setMessage("このアプリを実行するには位置情報の権限が必要です。")
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            // trueもfalseも結局同じrequestPermissionsを実行しているので一つにまとめるべきかも
+                            ActivityCompat.requestPermissions(BluetoothActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    REQUEST_PERMISSION);
+                        }
+                    })
+                    .create()
+                    .show();
+        } else {
+            ActivityCompat.requestPermissions(BluetoothActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSION);
+        }
+    }
+
+    // ネットpermissionの確認
+    public void checkPermission() {
+        // 既に許可している
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED){
+            //initFileLoader();
+        }
+        // 拒否していた場合
+        else{
+            requestLocationPermission();
+        }
+    }
+
+    // 許可を求める
+    private void requestLocationPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(BluetoothActivity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+
+        } else {
+            Toast toast = Toast.makeText(this, "アプリ実行に許可が必要です", Toast.LENGTH_SHORT);
+            toast.show();
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,}, REQUEST_PERMISSION);
+
+        }
+    }
+
+    // 結果の受け取り
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSION) {
+            // 使用が許可された
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                return;
+
+            } else {
+                // それでも拒否された時の対応
+                Toast toast = Toast.makeText(this, "何もできません", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+    }
 }
