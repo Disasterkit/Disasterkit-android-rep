@@ -6,7 +6,7 @@
     android:paddingRight="8dip"
     android:paddingTop="8dip"
     android:paddingBottom="8dip"
-    tools:context=".QRCord.QRread">
+    tools:context=".ui.QRCord.QRread">
 
     <LinearLayout
         android:layout_width="fill_parent"

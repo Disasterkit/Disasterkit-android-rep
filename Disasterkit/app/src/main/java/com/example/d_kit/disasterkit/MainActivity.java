@@ -7,69 +7,232 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
-import com.example.d_kit.disasterkit.Bluetooth.BluetoothActivity;
-import com.example.d_kit.disasterkit.DisplayMap.MapActivity;
-import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
-import com.example.d_kit.disasterkit.QRCord.QRmade;
+import com.example.d_kit.disasterkit.data.StaticConfig;
+import com.example.d_kit.disasterkit.service.ServiceUtils;
+import com.example.d_kit.disasterkit.ui.FriendsFragment;
+import com.example.d_kit.disasterkit.ui.GroupFragment;
+import com.example.d_kit.disasterkit.ui.LoginActivity;
+import com.example.d_kit.disasterkit.ui.UserProfileFragment;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private static String TAG = "MainActivity";
+    private ViewPager viewPager;
+    private TabLayout tabLayout = null;
     private final int REQUEST_PERMISSION = 1000;
+    public static String STR_FRIEND_FRAGMENT = "FRIEND";
+    public static String STR_GROUP_FRAGMENT = "GROUP";
+    public static String STR_INFO_FRAGMENT = "INFO";
+
+    private FloatingActionButton floatButton;
+    private ViewPagerAdapter adapter;
+
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if(toolbar != null) {
+            setSupportActionBar(toolbar);
+            getSupportActionBar().setTitle("Disaster kit");
+        }
 
         if (Build.VERSION.SDK_INT >= 23) {
             checkPermission();
             confirmPermission();
         }
+
+        viewPager = (ViewPager) findViewById(R.id.viewpager);
+        floatButton = (FloatingActionButton) findViewById(R.id.fab);
+        initTab();
+        initFirebase();
+    }
+
+    private void initFirebase() {
+        //Khoi tao thanh phan de dang nhap, dang ky
+        mAuth = FirebaseAuth.getInstance();
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                user = firebaseAuth.getCurrentUser();
+                if (user != null) {
+                    StaticConfig.UID = user.getUid();
+                } else {
+                    MainActivity.this.finish();
+                    // User is signed in
+                    startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                    Log.d(TAG, "onAuthStateChanged:signed_out");
+                }
+                // ...
+            }
+        };
+    }
+
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+        ServiceUtils.stopServiceFriendChat(getApplicationContext(), false);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+    protected void onStop() {
+        super.onStop();
+        if (mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+    protected void onDestroy() {
+        ServiceUtils.startServiceFriendChat(getApplicationContext());
+        super.onDestroy();
+    }
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.set1) {
-            Intent intent = new Intent(this, BluetoothActivity.class);
-            startActivity(intent);
+    /**
+     * Khoi tao 3 tab
+     */
+    //タブの設定
+    private void initTab() {
+        tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setSelectedTabIndicatorColor(getResources().getColor(R.color.colorIndivateTab));//タブの設定
+        setupViewPager(viewPager);
+        tabLayout.setupWithViewPager(viewPager);
+        setupTabIcons();//タブの生成
+    }
+
+
+    //タブに使うアイコンを配列に格納
+    private void setupTabIcons() {
+        int[] tabIcons = {
+                R.drawable.ic_tab_person,
+                R.drawable.ic_tab_group,
+                R.drawable.ic_tab_infor
+        };
+
+        //タブにアイコンを適用
+        tabLayout.getTabAt(0).setIcon(tabIcons[0]);
+        tabLayout.getTabAt(1).setIcon(tabIcons[1]);
+        tabLayout.getTabAt(2).setIcon(tabIcons[2]);
+    }
+
+    private void setupViewPager(ViewPager viewPager) {
+        adapter = new ViewPagerAdapter(getSupportFragmentManager());
+        adapter.addFrag(new FriendsFragment(), STR_FRIEND_FRAGMENT);
+        adapter.addFrag(new GroupFragment(), STR_GROUP_FRAGMENT);
+        adapter.addFrag(new UserProfileFragment(), STR_INFO_FRAGMENT);
+        floatButton.setOnClickListener(((FriendsFragment) adapter.getItem(0)).onClickFloatButton.getInstance(this));//最初にFrindFragment呼び出し
+        viewPager.setAdapter(adapter);
+        viewPager.setOffscreenPageLimit(3);//最大のタブの数
+        viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            //各
+            @Override
+            public void onPageSelected(int position) {
+                ServiceUtils.stopServiceFriendChat(MainActivity.this.getApplicationContext(), false);
+                if (adapter.getItem(position) instanceof FriendsFragment) {//今Friendsの時の動き
+                    floatButton.setVisibility(View.VISIBLE);
+                    floatButton.setOnClickListener(((FriendsFragment) adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
+                    floatButton.setImageResource(R.drawable.plus);//右下の＋ボタン
+                } else if (adapter.getItem(position) instanceof GroupFragment) {//今Groupの時の動き
+                    floatButton.setVisibility(View.VISIBLE);
+                    floatButton.setOnClickListener(((GroupFragment) adapter.getItem(position)).onClickFloatButton.getInstance(MainActivity.this));
+                    floatButton.setImageResource(R.drawable.ic_float_add_group);//グループ作成ボタン
+                } else {
+                    floatButton.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+    }
+
+    //    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//        if (requestCode == REQUEST_CODE_LOGIN && resultCode == RESULT_OK) {
+//            if (data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_LOGIN)) {
+//                authUtils.signIn(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+//            } else if (data.getStringExtra(STR_EXTRA_ACTION).equals(RegisterActivity.STR_EXTRA_ACTION_REGISTER)) {
+//                authUtils.createUser(data.getStringExtra(STR_EXTRA_USERNAME), data.getStringExtra(STR_EXTRA_PASSWORD));
+//            }else if(data.getStringExtra(STR_EXTRA_ACTION).equals(LoginActivity.STR_EXTRA_ACTION_RESET)){
+//                authUtils.resetPassword(data.getStringExtra(STR_EXTRA_USERNAME));
+//            }
+//        } else if (resultCode == RESULT_CANCELED) {
+//            this.finish();
+//        }
+//    }
+
+
+
+    /**
+     * Adapter hien thi tab
+     */
+    class ViewPagerAdapter extends FragmentPagerAdapter {
+        private final List<Fragment> mFragmentList = new ArrayList<>();
+        private final List<String> mFragmentTitleList = new ArrayList<>();
+
+        public ViewPagerAdapter(FragmentManager manager) {
+
+            super(manager);
         }
 
-        if (id == R.id.set2) {
-            Intent intent = new Intent(this, QRmade.class);
-            startActivity(intent);
+        @Override
+        public Fragment getItem(int position) {
+
+            return mFragmentList.get(position);
         }
 
-        if (id == R.id.set3) {
-            Intent intent = new Intent(this, MapActivity.class);
-            startActivity(intent);
+        @Override
+        public int getCount() {
+
+            return mFragmentList.size();
         }
 
-        if (id == R.id.set4) {
-            Intent intent = new Intent(this, MapDownload_Activity.class);
-            startActivity(intent);
+        public void addFrag(Fragment fragment, String title) {
+            mFragmentList.add(fragment);
+            mFragmentTitleList.add(title);
         }
 
-        return super.onOptionsItemSelected(item);
+        @Override
+        public CharSequence getPageTitle(int position) {
+
+            // return null to display only the icon
+            return null;
+        }
     }
 
     //GPSを使うためのパーミッションの確認

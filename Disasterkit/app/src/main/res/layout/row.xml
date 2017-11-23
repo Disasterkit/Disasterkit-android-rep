@@ -24,7 +24,7 @@
                 android:textSize="24sp" />
 
             <Button
-                android:id="@+id/button1"
+                android:id="@+id/buttondownload"
                 android:textSize="20sp"
                 android:paddingTop="20dp"
                 android:paddingBottom="20dp"
