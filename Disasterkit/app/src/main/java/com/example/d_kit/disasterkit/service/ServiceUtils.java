@@ -12,6 +12,7 @@ import com.example.d_kit.disasterkit.data.SharedPreferenceHelper;
 import com.example.d_kit.disasterkit.data.StaticConfig;
 import com.example.d_kit.disasterkit.model.Friend;
 import com.example.d_kit.disasterkit.model.ListFriend;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
