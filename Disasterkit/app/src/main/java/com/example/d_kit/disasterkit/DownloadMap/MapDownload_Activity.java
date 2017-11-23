@@ -64,7 +64,7 @@ public class MapDownload_Activity extends AppCompatActivity {
         final List<Map<String, String>> dataList = new ArrayList<Map<String, String>>();
 
         Map<String, String> data = new HashMap<String, String>();
-        data.put("title", "japan");
+        data.put("title", "日本全土");
         data.put("comment", "803.74MB");
         dataList.add(data);
 
@@ -135,9 +135,41 @@ public class MapDownload_Activity extends AppCompatActivity {
                 switch (view.getId()) {
                     case R.id.button1:
                         List listValues = new ArrayList(dataList.get(position).values());
-                        MAP_URL = "http://download.mapsforge.org/maps/asia/"+ listValues.get(1) +".map";
+                        //MAP_URL = "http://download.mapsforge.org/maps/asia/"+ listValues.get(1) +".map";
 
-                        //Toast.makeText(MainActivity.this, listValues.get(1) + "のボタンが押されました", Toast.LENGTH_SHORT).show();
+                        if (listValues.get(1).equals("日本全土")) {
+                            //MAP_URL = "http://download.mapsforge.org/maps/asia/\"+ listValues.get(1) +\".map";
+                            MAP_URL = "http://download.mapsforge.org/maps/multilingual/asia/japan.map";
+                        }
+                        if (listValues.get(1).equals("中国地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B8%AD%E5%9B%BD%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("九州地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B9%9D%E5%B7%9E%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("北海道")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E5%8C%97%E6%B5%B7%E9%81%93.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("四国地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E5%9B%9B%E5%9B%BD%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("東北地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E6%9D%B1%E5%8C%97%E5%9C%B0%E6%96%B9map?raw=true";
+                        }
+                        if (listValues.get(1).equals("沖縄県")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E6%B2%96%E7%B8%84%E7%9C%8C.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("関西地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E9%96%A2%E8%A5%BF%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("中部地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B8%AD%E9%83%A8%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("関東地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E9%96%A2%E6%9D%B1%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+
+                        // /Toast.makeText(MainActivity.this, listValues.get(1) + "のボタンが押されました", Toast.LENGTH_SHORT).show();
                         if(outputFile.exists()){
                             //ダイアログで警告をだしダウンロードを開始しない
 

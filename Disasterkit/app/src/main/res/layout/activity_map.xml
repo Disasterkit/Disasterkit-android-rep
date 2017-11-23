@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.d_kit.disasterkit.DisplayMap.MapActivity">
+    tools:context="com.android.rivchat.ui.DisplayMap.MapActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

@@ -7,19 +7,13 @@ import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.example.d_kit.disasterkit.DownloadMap.MapDownload_Activity;
 import com.example.d_kit.disasterkit.R;
 
 import org.mapsforge.core.graphics.Bitmap;
@@ -39,6 +33,12 @@ import java.io.File;
 
 public class MapActivity extends AppCompatActivity implements LocationListener
 {
+    private double[] lat;
+    private double[] lng;
+    private int[] sit;
+    private int[] situ;
+    private double[][] otherlocation;
+    private  int i=0;
 
     private final static String TAG = MapActivity.class.getSimpleName();
     private final static String MAP_FILE = "japan.map";
@@ -46,10 +46,6 @@ public class MapActivity extends AppCompatActivity implements LocationListener
     private Location lastLocation;
     //private Location mylastLocation;
     private final static int PERMISSION_REQUEST_CODE = 1;
-    private double[] acceptlocation;
-    private double[] otherlocation;
-
-    int i=0;
 
     private MapView mapView;
 
@@ -65,15 +61,36 @@ public class MapActivity extends AppCompatActivity implements LocationListener
         setContentView(mapView);
 
         Intent intent = getIntent();
-        acceptlocation = intent.getDoubleArrayExtra("key");
-        otherlocation=new double[10];
-        if (acceptlocation[i]!=0) {
+        lat = intent.getDoubleArrayExtra("lat");
+        lng = intent.getDoubleArrayExtra("lng");
+        sit = intent.getIntArrayExtra("sit");
 
-            while (acceptlocation[i] != 0) {
-                otherlocation[i] = acceptlocation[i];
-                i++;
+        if (lat[0]!=0.0&&lng[0]!=0.0) {
+            otherlocation=new double[2][2];
+            for(i=0;i<2;i++){
+                otherlocation[i][0]=0.0;
+                otherlocation[i][1]=0.0;
             }
+            situ=new int[2];
+            for(i=0;i<2;i++){
+                otherlocation[i][0]=lat[i];
+                otherlocation[i][1]=lng[i];
+                situ[i]=sit[i];
+            }
+
         }
+
+        /*
+        lat=new double[2];
+        lng=new double[2];
+        sit=new int[2];
+        for (int j=0;j<2;j++){
+            lat[j]=0.0;
+            lng[j]=0.0;
+            sit[j]=0;
+        }
+        */
+
 
 
         // ロケーションマネージャのインスタンスを取得する
@@ -92,61 +109,17 @@ public class MapActivity extends AppCompatActivity implements LocationListener
         // targetSDK 23 以上の場合、実行時にパーミッション確認を行う必要がある
         // https://stackoverflow.com/questions/8854359/exception-open-failed-eacces-permission-denied-on-android
         // https://developer.android.com/training/permissions/requesting.html
-        if (Build.VERSION.SDK_INT >= 23) {
-            final int permission = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
-            if (permission != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
-            } else {
-                displayMap(lastLocation);
-            }
+
+        if(lastLocation!=null) {
+            displayMap(lastLocation);
         }
 
-
-    }
-
-    //右上のメニューバーの作成
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.set1) {
-            Intent intent = new Intent(this, MapActivity.class);
-            startActivity(intent);
-        }
-
-        if (id == R.id.set2) {
-            Intent intent = new Intent(this, MapActivity.class);
-            startActivity(intent);
-        }
-
-        if (id == R.id.set3) {
-            Intent intent = new Intent(this, MapActivity.class);
-            startActivity(intent);
-        }
-
-        if (id == R.id.set4) {
-            Intent intent = new Intent(this, MapDownload_Activity.class);
-            startActivity(intent);
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
 
     @Override//最後の位置を記録する
     public void onStart() {
         super.onStart();
-
 
         if (PermissionChecker.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -195,7 +168,7 @@ public class MapActivity extends AppCompatActivity implements LocationListener
     public void onLocationChanged(Location location) {
         nowLocation(location);//現在地にマーカーを出力
         try {
-            myLocationManager.removeUpdates(this);//gennz
+            myLocationManager.removeUpdates(this);
         } catch(SecurityException e) {
         }
     }
@@ -247,14 +220,17 @@ public class MapActivity extends AppCompatActivity implements LocationListener
             mapView.setCenter(new LatLong(location.getLatitude(), location.getLongitude())); //現在地からマップスタート
             mapView.setZoomLevel((byte) 13);
             nowLocation(location);//現在地へのマーカーの出力
-            TUNODAMaker();
+            otherMaker();
+            //tunoda();
         }
 
         else {
-            mapView.setCenter(new LatLong(35.835311, 139.689335)); //現在地がない場合角田の家からマップスタート
+            mapView.setCenter(new LatLong(35.835311, 139.689335));
             mapView.setZoomLevel((byte) 13);
-            TUNODAMaker();//角田の家へのマーカー出力
+            otherMaker();
         }
+
+
 
     }
 
@@ -267,13 +243,33 @@ public class MapActivity extends AppCompatActivity implements LocationListener
     }
 
 
-
-    public void TUNODAMaker(){
-        LatLong tunoda = new LatLong(otherlocation[0], otherlocation[1]);
-        Marker marker = createBubbleMarker(tunoda, R.drawable.marker_green, "角田の家");
+    public  void tunoda(){
+        Marker marker = createBubbleMarker(new LatLong(35.835311,139.689335 ), R.drawable.marker_red, "空いています");
         mapView.getLayerManager().getLayers().add(marker);
+    }
+
+
+    public void otherMaker(){
+        for(int h=0;h<2;h++) {
+            if (otherlocation[h][0]!=0.0 && otherlocation[h][1]!=0.0) {
+                if (situ[h] == 0) {
+                    Marker marker = createBubbleMarker(new LatLong(otherlocation[h][0], otherlocation[h][1]), R.drawable.marker_green, "空いています");
+                    mapView.getLayerManager().getLayers().add(marker);
+                }
+
+                if (situ[h] == 1) {
+                    //LatLong tunoda = new LatLong(lat[h], lng[h]);
+                    Marker marker = createBubbleMarker(new LatLong(otherlocation[h][0], otherlocation[h][1]), R.drawable.marker_red, "混雑しています");
+                    mapView.getLayerManager().getLayers().add(marker);
+                }
+            }
+            else {
+                break;
+            }
+        }
 
     }
+
 
     //現在位置にマーカーを設置
     public void nowLocation(Location location){

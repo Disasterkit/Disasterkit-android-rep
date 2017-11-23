@@ -7,7 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.widget.TextView;
 
-import com.example.d_kit.disasterkit.R;
+import com.android.rivchat.R;
 
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.model.LatLong;
