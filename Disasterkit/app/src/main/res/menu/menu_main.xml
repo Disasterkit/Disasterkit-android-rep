@@ -1,28 +1,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.example.d_kit.disasterkit.MainActivity">
+    tools:context="com.android.rivchat.MainActivity">
     <item
-        android:id="@+id/set1"
+        android:id="@+id/about"
         android:orderInCategory="100"
-        android:title="トーク"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/set2"
-        android:orderInCategory="100"
-        android:title="友達追加"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/set3"
-        android:orderInCategory="100"
-        android:title="マップ"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/set4"
-        android:orderInCategory="100"
-        android:title="マップダウンロード"
+        android:title="@string/about"
         app:showAsAction="never" />
 </menu>

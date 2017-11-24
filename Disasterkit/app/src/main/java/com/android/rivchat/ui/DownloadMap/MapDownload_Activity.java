@@ -1,0 +1,397 @@
+package com.android.rivchat.ui.DownloadMap;
+
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.os.AsyncTask;
+import android.os.Bundle;
+import android.os.Environment;
+import android.os.Handler;
+import android.os.Message;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ListView;
+
+import com.android.rivchat.R;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+
+public class MapDownload_Activity extends AppCompatActivity {
+    private final int REQUEST_PERMISSION = 1000;
+    private final String TAG = "DownloadSample";
+    private Button loadStartButton;
+    private ProgressDialog progressDialog;
+    private Handler progressHandler;
+    private String MAP_URL ;
+    private  final String japanMAP ="http://download.mapsforge.org/maps/asia/japan.map";
+    private AsyncFileLoader fileLoader;
+    final File file = Environment.getExternalStorageDirectory();
+    final File directory = new File(file.getAbsolutePath() + "/Download/");
+    File outputFile = new File(directory, "japan.map");
+    private HashMap<String, String> data;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_download);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        progressHandler = new ProgressHandler();
+
+        /*
+        if (Build.VERSION.SDK_INT >= 23) {
+            checkPermission();
+        }
+        */
+
+        final List<Map<String, String>> dataList = new ArrayList<Map<String, String>>();
+
+        Map<String, String> data = new HashMap<String, String>();
+        data.put("title", "japan");
+        data.put("comment", "803.74MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "北海道");
+        data.put("comment", "93.3MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "東北地方");
+        data.put("comment", "94.6MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "関東地方");
+        data.put("comment", "129.7MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "中部地方");
+        data.put("comment", "167.8MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "関西地方");
+        data.put("comment", "86.2MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "中国地方");
+        data.put("comment", "68.7");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "四国地方");
+        data.put("comment", "34.5MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "九州地方");
+        data.put("comment", "90.6MB");
+        dataList.add(data);
+
+        data = new HashMap<String, String>();
+        data.put("title", "沖縄県");
+        data.put("comment", "6.4MB");
+        dataList.add(data);
+
+
+
+
+
+        Adapter adapter = new Adapter(
+                this,
+                dataList,
+                R.layout.row,
+                new String[] { "title", "comment" },
+                new int[] { android.R.id.text1,
+                        android.R.id.text2 });
+
+        ListView listView = (ListView) findViewById(R.id.listView1);
+        listView.setAdapter(adapter);
+
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                switch (view.getId()) {
+                    case R.id.buttondownload:
+                        List listValues = new ArrayList(dataList.get(position).values());
+                        //MAP_URL = "http://download.mapsforge.org/maps/asia/"+ listValues.get(1) +".map";
+
+                        if (listValues.get(1).equals("日本全土")) {
+                            //MAP_URL = "http://download.mapsforge.org/maps/asia/\"+ listValues.get(1) +\".map";
+                            MAP_URL = "http://download.mapsforge.org/maps/multilingual/asia/japan.map";
+                        }
+                        if (listValues.get(1).equals("中国地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B8%AD%E5%9B%BD%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("九州地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B9%9D%E5%B7%9E%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("北海道")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E5%8C%97%E6%B5%B7%E9%81%93.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("四国地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E5%9B%9B%E5%9B%BD%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("東北地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E6%9D%B1%E5%8C%97%E5%9C%B0%E6%96%B9map?raw=true";
+                        }
+                        if (listValues.get(1).equals("沖縄県")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E6%B2%96%E7%B8%84%E7%9C%8C.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("関西地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E9%96%A2%E8%A5%BF%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("中部地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E4%B8%AD%E9%83%A8%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+                        if (listValues.get(1).equals("関東地方")) {
+                            MAP_URL = "https://github.com/Disasterkit/Disasterkit-android-rep/blob/map/map/%E9%96%A2%E6%9D%B1%E5%9C%B0%E6%96%B9.map?raw=true";
+                        }
+
+                        //Toast.makeText(MainActivity.this, listValues.get(1) + "のボタンが押されました", Toast.LENGTH_SHORT).show();
+                        if(outputFile.exists()){
+                            //ダイアログで警告をだしダウンロードを開始しない
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MapDownload_Activity.this);
+                            builder.setMessage("すでに日本地図が保存されています。"+
+                                    "最初からダウンロードしますか？")
+                                    .setPositiveButton("DOWNLOAD", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            // ボタンをクリックしたときの動作
+                                            initFileLoader();
+                                            showDialog(0);
+                                            progressDialog.setProgress(0);
+                                            progressHandler.sendEmptyMessage(0);
+                                        }
+                                    });
+
+                            builder.setNegativeButton("CANCEL" , null);
+
+                            builder.show();
+
+                        }
+                        else {
+                            initFileLoader();
+                            showDialog(0);
+                            progressDialog.setProgress(0);
+                            progressHandler.sendEmptyMessage(0);
+                        }
+                        break;
+                }
+            }
+        });
+
+
+        /*
+        loadStartButton = (Button)findViewById(R.id.loadStartButton);
+        loadStartButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+
+                //すでにファイルがあった時の動作をここに↓
+                if(outputFile.exists()){
+                    //ダイアログで警告をだしダウンロードを開始しない
+
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setMessage("すでに日本地図が保存されています。"+
+                            "最初からダウンロードしますか？")
+                            .setPositiveButton("DOWNLOAD", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // ボタンをクリックしたときの動作
+                                    initFileLoader();
+                                    showDialog(0);
+                                    progressDialog.setProgress(0);
+                                    progressHandler.sendEmptyMessage(0);
+                                }
+                            });
+
+                    builder.setNegativeButton("CANCEL" , null);
+
+                    builder.show();
+
+                }
+                else {
+                    initFileLoader();
+                    showDialog(0);
+                    progressDialog.setProgress(0);
+                    progressHandler.sendEmptyMessage(0);
+                }
+            }
+        });
+        */
+
+        progressHandler = new Handler(){
+            public void handleMessage(Message msg){
+                super.handleMessage(msg);
+                if(fileLoader.isCancelled()){
+                    progressDialog.dismiss();
+                    Log.d(TAG, "load canceled");
+                }
+                else if(fileLoader.getStatus() == AsyncTask.Status.FINISHED){
+                    progressDialog.dismiss();
+                }else{
+                    progressDialog.setProgress(fileLoader.getLoadedBytePercent());
+                    progressHandler.sendEmptyMessageDelayed(0, 100);
+                }
+            }
+        };
+
+
+
+    }
+
+
+    @Override
+    protected void onPause(){
+        Log.d(TAG, "onPause");
+        super.onPause();
+        //cancelLoad();
+    }
+
+
+    @Override
+    protected void onStop(){
+        Log.d(TAG, "onStop");
+        super.onStop();
+        //cancelLoad();
+    }
+
+
+    private void cancelLoad()
+    {
+        if(fileLoader != null){
+            fileLoader.cancel(true);
+        }
+    }
+
+    private void initFileLoader()
+    {
+
+        /*
+        final File file = Environment.getExternalStorageDirectory();
+        final File directory = new File(file.getAbsolutePath() + "/Download/");
+        */
+
+        if(!directory.exists()){
+            directory.mkdir();
+        }
+
+        //File outputFile = new File(directory, "japan.map");
+
+        fileLoader = new AsyncFileLoader(this, MAP_URL, outputFile);
+        fileLoader.execute();
+
+
+   /*
+    //内部メモリの領域を用いる場合
+    File dataDir = this.getFilesDir();
+    File directory = new File(dataDir.getAbsolutePath()+ "/Download");
+    if(!directory.exists()){
+      if (directory.mkdir()){
+      }else{
+        Toast ts = Toast.makeText(this, "ディレクトリ作成に失敗", Toast.LENGTH_LONG);
+        ts.show();
+      }
+    }
+    File outputFile = new File(directory, "gaza.map");
+    _fileLoader = new AsyncFileLoader(this,MAP_URL, outputFile);
+    //_fileLoader.execute();
+    */
+
+    }
+
+    @Override
+    protected Dialog onCreateDialog(int id){
+        switch(id){
+            case 0:
+                progressDialog = new ProgressDialog(this);
+                // _progressDialog.setIcon(R.drawable.ic_launcher);
+                progressDialog.setTitle("Downloading files..");
+                progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+                progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, "Hide", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "hide");
+                    }
+                });
+                progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "cancel");
+                        cancelLoad();
+                    }
+                });
+        }
+        return progressDialog;
+    }
+
+
+
+
+    /*
+    // permissionの確認
+    public void checkPermission() {
+        // 既に許可している
+        if (ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)==PackageManager.PERMISSION_GRANTED){
+            //initFileLoader();
+        }
+        // 拒否していた場合
+        else{
+            requestLocationPermission();
+        }
+    }
+
+    // 許可を求める
+    private void requestLocationPermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            ActivityCompat.requestPermissions(MapDownload_Activity.this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+
+        } else {
+            Toast toast = Toast.makeText(this, "アプリ実行に許可が必要です", Toast.LENGTH_SHORT);
+            toast.show();
+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,}, REQUEST_PERMISSION);
+
+        }
+    }
+
+    // 結果の受け取り
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == REQUEST_PERMISSION) {
+            // 使用が許可された
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                return;
+
+            } else {
+                // それでも拒否された時の対応
+                Toast toast = Toast.makeText(this, "何もできません", Toast.LENGTH_SHORT);
+                toast.show();
+            }
+        }
+    }
+    */
+
+}

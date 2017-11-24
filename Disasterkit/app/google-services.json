@@ -103,7 +103,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:894760831726:android:1244c56be0518ae9",
         "android_client_info": {
-          "package_name": "com.android.rivchat"
+          "package_name": "com.hieuapp.rivchat"
         }
       },
       "oauth_client": [
@@ -122,39 +122,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
-        },
-        "ads_service": {
-          "status": 2
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:894760831726:android:6b6f322fba7c344f",
-        "android_client_info": {
-          "package_name": "com.example.d_kit.disasterkit"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "894760831726-h8qnbnefikh1tmt433jajojd2b4ntp2g.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyCNg9BPQFckLDkgpngUm-WwD_YvrjghkG0"
-        }
-      ],
-      "services": {
-        "analytics_service": {
-          "status": 1
-        },
-        "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "894760831726-h8qnbnefikh1tmt433jajojd2b4ntp2g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
